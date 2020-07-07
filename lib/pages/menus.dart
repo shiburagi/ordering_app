@@ -17,8 +17,17 @@ class MenusPage extends StatefulWidget {
 
 class _MenusPageState extends BlocState<MenusPage, MenuBloc> {
   QueueBloc get queueBloc => Provider.of(context, listen: false);
+  List get arguments => ModalRoute.of(context).settings.arguments;
+  TableNo get table => arguments[0];
+  Map<String, int> get orders => arguments[1];
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (queueBloc.data == null && orders != null) {
+      queueBloc.sink.add(orders);
+    }
+  }
 
-  TableNo get table => ModalRoute.of(context).settings.arguments;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,13 +116,36 @@ class _MenusPageState extends BlocState<MenusPage, MenuBloc> {
                 ],
               ),
             ),
-            DecorButton(
-              type: ButtonType.accent,
-              fullWidth: true,
-              onPressed: () {
-                queueBloc.submit(context, table);
-              },
-              child: Text("Confirm"),
+            Row(
+              children: [
+                Expanded(
+                  child: DecorButton(
+                    type: ButtonType.accent,
+                    fullWidth: true,
+                    onPressed: () {
+                      queueBloc.submit(context, table);
+                    },
+                    child: Text("Done"),
+                  ),
+                ),
+                ...orders == null
+                    ? []
+                    : [
+                        SizedBox(
+                          width: 16,
+                        ),
+                        Expanded(
+                          child: DecorButton(
+                            type: ButtonType.success,
+                            fullWidth: true,
+                            onPressed: () {
+                              queueBloc.submit(context, table);
+                            },
+                            child: Text("Pay"),
+                          ),
+                        ),
+                      ]
+              ],
             )
           ],
         ),

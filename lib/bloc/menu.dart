@@ -7,7 +7,11 @@ import 'package:srs_restaurant/stores/stores.dart';
 
 class MenuBloc extends BaseBloc {
   Stream<List<Menu>> retrieveMenu() {
-    return menusStore.snapshots().map((event) {
+    return menusStore
+        .orderBy("category")
+        .orderBy("name")
+        .snapshots()
+        .map((event) {
       debugPrint(event.documents[0].data.toString());
       List<Menu> tables = event.documents.map((e) {
         Menu menu = Menu.fromJson(e.data);

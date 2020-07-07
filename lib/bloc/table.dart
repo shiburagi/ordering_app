@@ -6,7 +6,7 @@ import 'package:srs_restaurant/stores/stores.dart';
 
 class TableBloc extends BaseBloc {
   Stream<List<TableNo>> retrieveTable() {
-    return tablesStore.snapshots().map((event) {
+    return tablesStore.orderBy("code").snapshots().map((event) {
       List<TableNo> tables =
           event.documents.map((e) => TableNo.fromJson(e.data)).toList();
       return tables;
