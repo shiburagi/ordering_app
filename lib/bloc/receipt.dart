@@ -53,7 +53,6 @@ class ReceiptBloc extends BaseBloc {
     }
 
     await startPrint(context, table);
-
     // if (!await bluetoothPrint.isConnected) return;
 
     // if (await isBluetoothConnected) ;

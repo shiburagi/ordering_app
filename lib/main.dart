@@ -7,6 +7,7 @@ import 'package:srs_restaurant/bloc/shop_info.dart';
 import 'package:srs_restaurant/bloc/table.dart';
 import 'package:srs_restaurant/pages/home.dart';
 import 'package:srs_restaurant/pages/menus.dart';
+import 'package:srs_restaurant/pages/order.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,6 +16,7 @@ void main() {
 Map<String, WidgetBuilder> routes = {
   "/": (context) => HomePage(),
   "/menus": (context) => MenusPage(),
+  "/order": (context) => OrderPage(),
 };
 
 class MyApp extends StatelessWidget {

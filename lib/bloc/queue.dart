@@ -15,6 +15,7 @@ class QueueBloc extends BaseBloc<Map<String, int>> {
     context,
     TableNo table,
   ) async {
+    orders["millis"] = DateTime.now().millisecondsSinceEpoch;
     await queueStore.document(table.code).setData(orders);
     sink.add(null);
     Navigator.of(context).pop();
