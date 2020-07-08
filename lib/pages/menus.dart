@@ -5,6 +5,7 @@ import 'package:provider_boilerplate/components/button.dart';
 import 'package:provider_boilerplate/provider_boilerplate.dart';
 import 'package:srs_restaurant/bloc/menu.dart';
 import 'package:srs_restaurant/bloc/queue.dart';
+import 'package:srs_restaurant/bloc/receipt.dart';
 import 'package:srs_restaurant/entities/menu.dart';
 import 'package:srs_restaurant/entities/table.dart';
 
@@ -17,6 +18,7 @@ class MenusPage extends StatefulWidget {
 
 class _MenusPageState extends BlocState<MenusPage, MenuBloc> {
   QueueBloc get queueBloc => Provider.of(context, listen: false);
+  ReceiptBloc get receiptBloc => Provider.of(context, listen: false);
   List get arguments => ModalRoute.of(context).settings.arguments;
   TableNo get table => arguments[0];
   Map<String, int> get orders => arguments[1];
@@ -31,39 +33,65 @@ class _MenusPageState extends BlocState<MenusPage, MenuBloc> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: Text("Table: ${table.code}"),
+      ),
       body: StreamBuilder<List<Menu>>(
           stream: bloc.retrieveMenu(),
           builder: (context, snapshot) {
             debugPrint("${snapshot.data}");
-            return Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    itemBuilder: (context, index) {
-                      Menu menu = snapshot.data[index];
-                      return InkWell(
-                        onTap: () {
-                          queueBloc.add(menu.id);
-                        },
-                        child: ListTile(
-                          dense: true,
-                          title: Text(menu.name),
-                          subtitle: Text("RM ${menu.price.toStringAsFixed(2)}"),
+            return OrientationBuilder(builder: (context, orientation) {
+              return orientation == Orientation.portrait
+                  ? Column(
+                      children: [
+                        Expanded(
+                          child: buildMenuList(snapshot),
                         ),
-                      );
-                    },
-                    itemCount: snapshot.data?.length ?? 0,
-                  ),
-                ),
-                StreamBuilder<Map<String, int>>(
-                    stream: queueBloc.stream,
-                    builder: (context, s) {
-                      return buildSummary(snapshot.data);
-                    }),
-              ],
-            );
+                        Expanded(
+                          child: StreamBuilder<Map<String, int>>(
+                              stream: queueBloc.stream,
+                              builder: (context, s) {
+                                return buildSummary(snapshot.data);
+                              }),
+                        ),
+                      ],
+                    )
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: buildMenuList(snapshot),
+                        ),
+                        Expanded(
+                          child: StreamBuilder<Map<String, int>>(
+                              stream: queueBloc.stream,
+                              builder: (context, s) {
+                                return buildSummary(snapshot.data);
+                              }),
+                        ),
+                      ],
+                    );
+            });
           }),
+    );
+  }
+
+  ListView buildMenuList(AsyncSnapshot<List<Menu>> snapshot) {
+    return ListView.builder(
+      itemBuilder: (context, index) {
+        Menu menu = snapshot.data[index];
+        return InkWell(
+          onTap: () {
+            queueBloc.add(menu.id);
+          },
+          child: ListTile(
+            dense: true,
+            title: Text(menu.name),
+            subtitle: Text("RM ${menu.price.toStringAsFixed(2)}"),
+          ),
+        );
+      },
+      itemCount: snapshot.data?.length ?? 0,
     );
   }
 
@@ -84,71 +112,67 @@ class _MenusPageState extends BlocState<MenusPage, MenuBloc> {
             style: Theme.of(context).textTheme.subtitle2));
       }
     });
-    return ConstrainedBox(
-      constraints:
-          BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 2.5),
-      child: Card(
-        elevation: 4,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-                  child: Table(
-                    children: [
-                      ...list,
-                    ],
-                  ),
+    return Card(
+      elevation: 4,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              child: Container(
+                padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                child: Table(
+                  children: [
+                    ...list,
+                  ],
                 ),
               ),
             ),
-            Container(
-              height: 1,
-              color: Theme.of(context).dividerColor,
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
-              child: Table(
-                children: [
-                  buildSummaryInfo("Total amount", totalAmount),
-                ],
-              ),
-            ),
-            Row(
+          ),
+          Container(
+            height: 1,
+            color: Theme.of(context).dividerColor,
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+            child: Table(
               children: [
-                Expanded(
-                  child: DecorButton(
-                    type: ButtonType.accent,
-                    fullWidth: true,
-                    onPressed: () {
-                      queueBloc.submit(context, table);
-                    },
-                    child: Text("Done"),
-                  ),
-                ),
-                ...orders == null
-                    ? []
-                    : [
-                        SizedBox(
-                          width: 16,
-                        ),
-                        Expanded(
-                          child: DecorButton(
-                            type: ButtonType.success,
-                            fullWidth: true,
-                            onPressed: () {
-                              queueBloc.submit(context, table);
-                            },
-                            child: Text("Pay"),
-                          ),
-                        ),
-                      ]
+                buildSummaryInfo("Total amount", totalAmount),
               ],
-            )
-          ],
-        ),
+            ),
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: DecorButton(
+                  type: ButtonType.accent,
+                  fullWidth: true,
+                  onPressed: () {
+                    queueBloc.submit(context, table);
+                  },
+                  child: Text("Done"),
+                ),
+              ),
+              ...orders == null
+                  ? []
+                  : [
+                      SizedBox(
+                        width: 8,
+                      ),
+                      Expanded(
+                        child: DecorButton(
+                          type: ButtonType.success,
+                          fullWidth: true,
+                          onPressed: () {
+                            receiptBloc.print(context, table);
+                          },
+                          child: Text("Pay"),
+                        ),
+                      ),
+                    ]
+            ],
+          )
+        ],
       ),
     );
   }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider_boilerplate/provider_boilerplate.dart';
 import 'package:srs_restaurant/bloc/menu.dart';
 import 'package:srs_restaurant/bloc/queue.dart';
+import 'package:srs_restaurant/bloc/receipt.dart';
+import 'package:srs_restaurant/bloc/shop_info.dart';
 import 'package:srs_restaurant/bloc/table.dart';
 import 'package:srs_restaurant/pages/home.dart';
 import 'package:srs_restaurant/pages/menus.dart';
@@ -24,6 +26,8 @@ class MyApp extends StatelessWidget {
         registerProvider(TableBloc()),
         registerProvider(QueueBloc()),
         registerProvider(MenuBloc()),
+        registerProvider(ReceiptBloc()),
+        registerProvider(ShopInfoBloc()),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',

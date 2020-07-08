@@ -6,6 +6,8 @@ import 'package:srs_restaurant/entities/menu.dart';
 import 'package:srs_restaurant/stores/stores.dart';
 
 class MenuBloc extends BaseBloc {
+  List<Menu> _menu = [];
+  List<Menu> get menu => _menu;
   Stream<List<Menu>> retrieveMenu() {
     return menusStore
         .orderBy("category")
@@ -20,6 +22,9 @@ class MenuBloc extends BaseBloc {
       }).toList();
 
       return tables;
-    });
+    })
+          ..listen((event) {
+            _menu = event;
+          });
   }
 }
